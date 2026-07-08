@@ -12,6 +12,7 @@ import { AsistenteDetalle } from './pages/asistentes/AsistenteDetalle';
 import { Familias } from './pages/Familias';
 import { FamiliaDetalle } from './pages/familias/FamiliaDetalle';
 import { ListaPrecios } from './pages/ListaPrecios';
+import { UsuariosPanel } from './pages/UsuariosPanel';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               <Route path="familias" element={<Familias />} />
               <Route path="familias/:id" element={<FamiliaDetalle />} />
               <Route path="lista-precios" element={<ListaPrecios />} />
+              <Route path="usuarios-panel" element={<UsuariosPanel />} />
             </Route>
           </Routes>
         </BrowserRouter>

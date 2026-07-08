@@ -25,28 +25,34 @@ export function Dashboard() {
   const { t } = useLocale();
   const postulaciones = useSupabaseTable('postulaciones');
   const solicitudes = useSupabaseTable('solicitudes');
+  const asistentes = useSupabaseTable('asistentes');
+  const familias = useSupabaseTable('familias');
 
-  const estadoGeneral =
-    postulaciones.estado === 'error' || solicitudes.estado === 'error'
-      ? 'error'
-      : postulaciones.estado === 'cargando' || solicitudes.estado === 'cargando'
-        ? 'cargando'
-        : 'listo';
+  const estados = [postulaciones.estado, solicitudes.estado, asistentes.estado, familias.estado];
+  const estadoGeneral = estados.includes('error')
+    ? 'error'
+    : estados.includes('cargando')
+      ? 'cargando'
+      : 'listo';
 
   const postulacionesHoy = postulaciones.filas.filter((p) => esHoy(p.creado_en)).length;
   const postulacionesSemana = postulaciones.filas.filter((p) => esEstaSemana(p.creado_en)).length;
   const solicitudesPendientes = solicitudes.filas.filter((s) => s.estado === 'nueva').length;
+  const asistentesDisponibles = asistentes.filas.filter((a) => a.estado === 'activo').length;
+  const familiasActivas = familias.filas.filter((f) => !f.deleted_at).length;
 
   return (
     <div>
       <h1>{t.dashboard.titulo}</h1>
       <EstadoLista
         estado={estadoGeneral}
-        error={postulaciones.error || solicitudes.error}
+        error={postulaciones.error || solicitudes.error || asistentes.error || familias.error}
         vacio={false}
         recargar={() => {
           postulaciones.recargar();
           solicitudes.recargar();
+          asistentes.recargar();
+          familias.recargar();
         }}
       >
         <div className="dashboard-metricas">
@@ -61,6 +67,14 @@ export function Dashboard() {
           <div className="metrica-card">
             <span className="metrica-valor">{solicitudesPendientes}</span>
             <span className="metrica-label">{t.dashboard.solicitudes_pendientes}</span>
+          </div>
+          <div className="metrica-card">
+            <span className="metrica-valor">{asistentesDisponibles}</span>
+            <span className="metrica-label">{t.dashboard.asistentes_disponibles}</span>
+          </div>
+          <div className="metrica-card">
+            <span className="metrica-valor">{familiasActivas}</span>
+            <span className="metrica-label">{t.dashboard.familias_activas}</span>
           </div>
         </div>
       </EstadoLista>
