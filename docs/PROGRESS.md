@@ -10,9 +10,9 @@
 |---|---|---|
 | 0 | Setup: repo, estructura, variables de entorno | 🟢 Completo |
 | 1 | Sitio web público (páginas + formularios + backend) | 🟡 En progreso |
-| 2 | Panel de administración (Módulos 1-5 + primer corte de precios/Prestaciones + gestión de usuarios del Panel + Proceso de Incorporación + Certificado prestadora-original) | 🟡 En progreso — código completo pendiente de deploy a producción; Módulos 6-7 pendientes; Módulo 8 (config general) con primer esquema (evoluciona con el uso); `schema_etapa2e.sql`/`schema_etapa2f.sql` **no aplicados todavía contra Supabase real** |
+| 2 | Panel de administración (Módulos 1-5 + primer corte de precios/Prestaciones + gestión de usuarios del Panel + Proceso de Incorporación + Certificado prestadora-original) | 🟢 Desplegado a producción (2026-07-08): https://prestadora-original-panel.vercel.app — Módulos 6-7 pendientes; Módulo 8 (config general) con primer esquema (evoluciona con el uso) |
 | 2B | Gestión de Personal (vínculo/cese/riesgo/cobertura) | 🟢 Completo — código listo y SQL aplicado/verificado contra Supabase real |
-| 3 | PWA Asistentes (login, guardias, GPS, reporte + IA) | 🔴 No iniciado — bloqueado hasta que Etapa 2 esté desplegada (regla de secuencia de `BUILD_ORDER.md`) |
+| 3 | PWA Asistentes (login, guardias, GPS, reporte + IA) | 🔴 No iniciado — desbloqueada: Etapa 2 ya está desplegada (regla de secuencia de `BUILD_ORDER.md`) |
 | 4 | PWA Familias (login, reportes, alertas) | 🔴 No iniciado |
 | 5 | Planillas IOMA (PDF) | 🔴 No iniciado |
 | 6 | Perfil público del Asistente con QR | 🔴 No iniciado — el QR del Certificado prestadora-original (Módulo 4 del Panel) ya apunta a la URL futura de esta etapa |
@@ -402,9 +402,21 @@ tabla que ya existía en `schema_etapa2b.sql` sin ninguna UI):
 `npx vitest run` 18/18 sin regresiones; `node --check` sobre los 4 archivos backend
 tocados/creados (`panelCuentas.js`, `panelUsuarios.js`, `server.js`, `cuentasPanel.js`);
 paridad de claves i18n verificada programáticamente entre es-AR/en/pt-BR (0 mismatches).
-**No verificado en este segmento** (sin acceso a la base real desde este entorno): que
-`schema_etapa2e.sql` y `schema_etapa2f.sql` corran limpio contra Supabase — falta
-ejecutarlos ahí antes del deploy a producción.
+`schema_etapa2e.sql` y `schema_etapa2f.sql` corridos contra Supabase real y verificados
+(columna `postulaciones.asistente_id`, tabla `certificados` con RLS y policy activas).
+
+## Actualización — Deploy del Panel a producción
+
+Desplegado en Vercel: **https://prestadora-original-panel.vercel.app** (proyecto `prestadora-original-panel`,
+mismo team `betosps-projects` que `sitio-web`). `panel/vercel.json` agregado con rewrite
+SPA (`/(.*)` → `/index.html`) para que las rutas de React Router no den 404 al refrescar.
+Variables de entorno de producción cargadas en Vercel: `VITE_SUPABASE_URL`,
+`VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` (apunta al backend real en Railway,
+`https://prestadora-original-backend-production.up.railway.app`), `VITE_SITE_URL`. El backend ya
+acepta requests del panel sin cambios (`cors()` sin restricción de origen en
+`backend/src/server.js`). Meta `robots: noindex, nofollow` confirmada en producción
+(`curl` sobre la URL real). Con esto, Etapa 3 (PWA Asistentes) queda desbloqueada según
+la regla de secuencia de `BUILD_ORDER.md`.
 
 ## Problemas conocidos / deuda técnica
 
@@ -416,10 +428,6 @@ _Registrar acá bugs conocidos o deuda técnica para la próxima sesión._
   **No usar en producción sin revisión de un abogado laboralista.**
 - Del PRD_02B quedan deliberadamente afuera de este corte (no bloquean el resto): el
   generador de documentación (PDF de liquidación de cese, función 7 de 9 del PRD).
-- `backend/src/db/schema_etapa2e.sql` y `schema_etapa2f.sql` (Proceso de Incorporación +
-  Certificado prestadora-original) están escritos y verificados por sintaxis, pero **no se aplicaron
-  todavía contra el Supabase real** — hace falta correrlos ahí antes de desplegar el Panel
-  a producción, igual que se hizo con los esquemas anteriores.
 - El diseño visual/formato del certificado (PDF descargable con membrete, etc.) no está
   definido en ningún PRD — el corte actual solo genera el QR como imagen PNG descargable,
   sin un layout de certificado imprimible. Queda para cuando haya spec de diseño.
@@ -430,6 +438,7 @@ _Una entrada por sesión de trabajo, más reciente primero._
 
 | Fecha | Sesión | Archivos |
 |---|---|---|
+| 2026-07-08 | Aplicar SQL contra Supabase real y deploy del Panel a producción | `backend/src/db/{schema_etapa2e,schema_etapa2f}.sql` (aplicados y verificados contra Supabase real); `panel/vercel.json` (nuevo, rewrite SPA); `panel/.gitignore` (excluye `.vercel`) |
 | 2026-07-08 | Afinado final de Etapa 2: usuarios del Panel, métricas de Dashboard, Proceso de Incorporación, Certificado prestadora-original | `CLAUDE.md` (glosario actualizado); `backend/src/db/{schema_etapa2e,schema_etapa2f}.sql` (nuevos, no aplicados aún); `backend/src/routes/panelUsuarios.js` (nuevo); `backend/src/routes/panelCuentas.js` (endpoint `/asistente`); `backend/src/utils/cuentasPanel.js` (`zonas` opcional); `backend/src/server.js` (ruta montada); `panel/src/pages/UsuariosPanel.jsx` (nuevo); `panel/src/pages/Dashboard.jsx` (2 métricas nuevas); `panel/src/pages/PostulacionDetalle.jsx` (botón iniciar incorporación); `panel/src/pages/asistentes/{VerificacionTab,CertificadoTab}.jsx` (nuevos); `panel/src/pages/asistentes/AsistenteDetalle.jsx` (2 tabs nuevas); `panel/src/App.jsx` (ruta `/usuarios-panel`); `panel/src/components/layout/Layout.jsx` (link de nav); `panel/src/index.css` (clase `.panel-card-verificacion`); `panel/src/i18n/translations.js` (claves nuevas en es-AR/en/pt-BR); `panel/package.json` (agregado `qrcode`); `panel/.env`/`.env.example` (`VITE_SITE_URL`) |
 | 2026-07-08 | Primer esquema de Precios y Prestaciones particulares por Paciente | `backend/src/db/schema_etapa2d.sql` (nuevo, aplicado y verificado); `panel/src/pages/ListaPrecios.jsx` + `ListaPrecioDetalle.jsx` (nuevos); `panel/src/pages/familias/PrestacionesPaciente.jsx` (nuevo); `panel/src/pages/familias/FamiliaDetalle.jsx` (botón "Prestaciones" por Paciente); `panel/src/App.jsx` (ruta `/lista-precios`); `panel/src/components/layout/Layout.jsx` (link de nav); `panel/src/i18n/translations.js` (bloques `lista_precios` y `prestaciones` + `nav.lista_precios`/`comun.editar` en es-AR/en/pt-BR) |
 | 2026-07-08 | Módulo 5 completo: pantalla de Familias y Pacientes | `panel/src/pages/Familias.jsx` (nuevo); `panel/src/pages/familias/FamiliaDetalle.jsx` (nuevo); `panel/src/App.jsx` (rutas `/familias` y `/familias/:id`); `panel/src/components/layout/Layout.jsx` (link de nav); `panel/src/i18n/translations.js` (bloque `familias` + `nav.familias` en es-AR/en/pt-BR) |
