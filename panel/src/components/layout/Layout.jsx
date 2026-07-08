@@ -18,6 +18,7 @@ export function Layout() {
           <NavLink to="/postulaciones">{t.nav.postulaciones}</NavLink>
           <NavLink to="/solicitudes">{t.nav.solicitudes}</NavLink>
           <NavLink to="/asistentes">{t.nav.asistentes}</NavLink>
+          <NavLink to="/familias">{t.nav.familias}</NavLink>
         </nav>
       </aside>
       <div className="panel-main">
