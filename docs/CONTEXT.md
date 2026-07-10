@@ -26,35 +26,44 @@
   primera). prestadora-original sigue con su negocio de cuidado domiciliario y suma un servicio B2B de
   auditoría/certificación a otras prestadoras. El plan técnico completo (entidad
   `prestadoras`, aislamiento multi-tenant, roles nuevos, facturación dual PLM/prestadora-original,
-  i18n y multi-moneda desde el arranque, residencia de datos a futuro) está en
-  `docs/Prompt_Claude_Code_PLM_Multitenant.md` — ver también `CLAUDE.md`. **Nada de esto
-  está implementado todavía**: el sistema sigue siendo mono-tenant (una sola organización,
-  prestadora-original) en producción. No empezar la implementación sin el inventario/plan previo que
-  pide ese documento y sin aprobación explícita del usuario.
+  i18n y multi-moneda desde el arranque, residencia de datos a futuro) está definido en
+  `docs/Prompt_Claude_Code_PLM_Multitenant.md` (dirección de arquitectura original) y su
+  ejecución viva se sigue en `docs/PLAN_MULTITENANT_PLM.md` — ver también `CLAUDE.md`.
+  **Estado real (actualizado 2026-07-10): ya NO es mono-tenant.** Los Bloques 1
+  (aislamiento aditivo de datos: tabla `prestadoras` + `prestadora_id NOT NULL` en 15
+  tablas), 2 (RLS centralizada vía `current_tenant()`/`es_superadmin()`, ~28 policies
+  reescritas, rol `admin` renombrado a `admin_prestadora` en dato y código sin transición
+  pendiente) y 3 (filtrado de tenant en rutas backend con Service Role Key) ya están
+  aplicados y verificados contra Supabase real. Solo el Bloque 4 (`configuracion_prestadora`
+  reemplazando la configuración singleton + eliminar hardcodeos de marca/branding) sigue sin
+  arrancar — ver `docs/PROGRESS.md` para el detalle Bloque a Bloque.
 
 ## Roles de usuario
 
 | Rol | Dónde opera | Ve |
 |---|---|---|
-| Superadmin | Panel de administración (login propio, capa separada de Admin) | Todo lo de Admin, más acceso técnico: cambios profundos de configuración, alta/baja de cosas que no es prudente que un Admin sin ese nivel opere, interacción con IA para diagnóstico/corrección de errores |
-| Admin | Panel de administración | Todo el negocio (sin el acceso técnico de Superadmin) |
+| Superadmin | Panel de administración (login propio, capa separada de Admin_prestadora) | Todo lo de Admin_prestadora en todas las prestadoras, más acceso técnico: cambios profundos de configuración, alta/baja de cosas que no es prudente que un Admin_prestadora sin ese nivel opere, interacción con IA para diagnóstico/corrección de errores |
+| Admin_prestadora | Panel de administración | Todo el negocio de su propia prestadora (sin el acceso técnico de Superadmin, cero visibilidad de otras prestadoras) |
 | Coordinador | Panel de administración | Su zona asignada |
 | Asistente | PWA de Asistentes | Sus propias guardias, su perfil, su certificado |
 | Familia | PWA de Familias | Sus pacientes, reportes y alertas de sus pacientes |
 
 Acordado en sesión (2026-07-07): Superadmin es un quinto rol real, con login propio,
-distinto de Admin — no un simple flag sobre el mismo usuario. Antes no estaba en ningún
-PRD original; se agrega por decisión explícita de negocio (necesidad de que alguien con
-más permiso técnico pueda operar sin exponer ese poder a un Admin de negocio "neófito").
+distinto de Admin_prestadora — no un simple flag sobre el mismo usuario. Antes no estaba en
+ningún PRD original; se agrega por decisión explícita de negocio (necesidad de que alguien
+con más permiso técnico pueda operar sin exponer ese poder a un Admin_prestadora de negocio
+"neófito").
 
 Ningún rol de Asistente/Familia debe tener acceso, ni siquiera de solo lectura, a
 `escalas_legales`, `ceses`, `ausencias` ni a datos laborales internos de otros Asistentes.
 
-Roles futuros, no implementados todavía (ver `docs/Prompt_Claude_Code_PLM_Multitenant.md`):
-"Administrador de prestadora" (acceso acotado a los datos de su propia prestadora, cero
-visibilidad de otras) y, más adelante, un rol de solo lectura agregada para financiadores
-(obras sociales/prepagas). No diseñar código para estos roles sin que se apruebe
-explícitamente entrar en la etapa de multi-tenancy.
+**Actualizado 2026-07-10:** el rol antes descripto acá como "Administrador de prestadora"
+(futuro) ya está implementado — es el mismo rol de la tabla de arriba, renombrado de
+`admin` a `admin_prestadora` (Bloque 2 de `docs/PLAN_MULTITENANT_PLM.md`), con acceso
+acotado a los datos de su propia prestadora y cero visibilidad de otras, verificado contra
+Supabase real. Lo único que sigue siendo futuro, no implementado, es un rol de solo lectura
+agregada para financiadores (obras sociales/prepagas) — no diseñar código para ese rol sin
+que se apruebe explícitamente.
 
 ## Stack por etapa
 
@@ -115,8 +124,15 @@ Etapa 2 — Panel de administración
   Pacientes; guardias activas/historial de reportes/alertas activas quedan marcadas como "no
   disponible todavía" porque dependen de datos que solo genera la PWA de Asistentes (Etapa
   3, no construida). El lado Asistente del mecanismo de cuentas (depende de una UI de Filtro
-  prestadora-original que no existe) sigue afuera. Módulos 6-7 quedan para sesiones siguientes — ver
-  `docs/PROGRESS.md`.
+  prestadora-original que no existe) sigue afuera.
+
+  Módulo 6 (Guardias), estado 2026-07-10: solo el schema de datos está construido y
+  verificado contra Supabase real (`backend/src/db/schema_modulo6_guardias.sql`, 8 tablas
+  con RLS multi-tenant vía FKs compuestas — series_guardias, guardias,
+  domicilios_temporales_paciente, personal_emergencia, incidentes_relevo,
+  configuracion_escalada_relevo, excepciones_familiar_relevo, guardias_tracking_gps).
+  Todavía **no existen** rutas backend (CRUD) ni pantallas de Panel para este módulo — ver
+  `docs/PROGRESS.md` para el detalle. Módulo 7 queda para sesiones siguientes.
 
   Módulo 8 (Precios/Prestaciones), primer corte: `schema_etapa2d.sql` (tablas
   `lista_precios`, `prestaciones`, `paquetes_prestaciones`, `paquete_prestacion_items`) ya
@@ -162,11 +178,25 @@ export const T = {
 };
 ```
 
-Nota de marca: el manual de identidad registra "Cuidamos tus afectos" en el logo, mientras
-que la documentación de contexto usa "Cuida tus afectos". No está resuelto — usar
-"Cuida tus afectos" como valor por defecto en el código hasta que Alberto/Inversor confirmen
-cuál es el definitivo, pero mantenerlo como una sola clave de `T` (`hero_title`) para que el
-cambio, cuando llegue, sea de un solo lugar.
+**Regla de slogan (resuelta 2026-07-09): no hay una forma "definitiva" — conviven dos, según
+contexto de uso**, siguiendo la regla de voz de marca ya definida en
+`docs/prestadora-original_Fundacional_v3.pdf` sección 5.2 ("Voz: primera persona del plural: 'En prestadora-original
+verificamos...', 'Nuestros Asistentes...'"):
+
+- **"Cuida tus afectos"** (imperativo, segunda persona) — el sitio le habla directamente a
+  quien lo visita: `hero_title` de la Home, titulares publicitarios, meta descriptions
+  SEO/clic. Es la forma correcta en `T.hero_title` (`sitio-web/src/i18n/translations.js`) y
+  en la meta description de `/` (`docs/PRD_01_Sitio_Web.md`).
+- **"Cuidamos tus afectos"** (primera persona del plural, voz institucional) — prestadora-original habla
+  de sí misma: el logo/isotipo (`prestadora-original_Manual_Identidad_v1.html`, correcto así, no tocar),
+  taglines de footer, la ficha de identidad de marca. Hoy el footer del sitio
+  (`sitio-web/src/components/Footer.jsx`) no tiene ningún tagline — si se agrega uno a
+  futuro, esta es la forma que le corresponde.
+
+No son dos valores en pugna de una sola clave de `T`, son dos claves con función distinta.
+Si en algún momento se agrega el tagline institucional al footer o a otra pieza de voz de
+marca, evaluar entonces una clave separada (por ejemplo `brand_tagline`) en vez de reutilizar
+`hero_title` fuera de su contexto de Home.
 
 ## Identidad visual
 
@@ -210,3 +240,8 @@ construir cualquier flujo de cobro, esto necesita una decisión de negocio expl�
 - v2 (2026-07-09): se documenta el cambio societario PLM Systems / prestadora-original y la dirección
   de multi-tenancy futura (ver `docs/Prompt_Claude_Code_PLM_Multitenant.md`), sin
   implementar nada todavía.
+- v3 (2026-07-10): barrido completo contra la realidad del código — Bloques 1-3 de
+  multi-tenancy ya aplicados y verificados (rol `admin` renombrado a `admin_prestadora` en
+  dato y código, RLS vía `current_tenant()`/`es_superadmin()`, filtrado de tenant en
+  backend), solo el Bloque 4 sigue pendiente; se documenta el estado real de Módulo 6
+  (Guardias): schema aplicado, sin rutas backend ni UI de Panel todavía.
