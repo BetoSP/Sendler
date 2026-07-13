@@ -12,6 +12,7 @@ import { AsistenteDetalle } from './pages/asistentes/AsistenteDetalle';
 import { Familias } from './pages/Familias';
 import { FamiliaDetalle } from './pages/familias/FamiliaDetalle';
 import { Guardias } from './pages/Guardias';
+import { Continuidad } from './pages/Continuidad';
 import { ListaPrecios } from './pages/ListaPrecios';
 import { UsuariosPanel } from './pages/UsuariosPanel';
 import { Configuracion } from './pages/Configuracion';
@@ -39,6 +40,7 @@ function App() {
               <Route path="familias" element={<Familias />} />
               <Route path="familias/:id" element={<FamiliaDetalle />} />
               <Route path="guardias" element={<Guardias />} />
+              <Route path="continuidad" element={<Continuidad />} />
               <Route path="lista-precios" element={<ListaPrecios />} />
               <Route path="usuarios-panel" element={<ProtectedRoute soloAdmin><UsuariosPanel /></ProtectedRoute>} />
               <Route path="configuracion" element={<ProtectedRoute soloAdmin><Configuracion /></ProtectedRoute>} />
