@@ -7,7 +7,7 @@
 
 ## Nota importante sobre alcance de negocio
 
-**prestadora-original TRABAJA CON AMBOS ESQUEMAS — CUIDADO DIRECTO Y MARKETPLACE — DESDE EL MINUTO 1.**
+**TODA PRESTADORA TRABAJA CON AMBOS ESQUEMAS — CUIDADO DIRECTO Y MARKETPLACE — DESDE EL MINUTO 1.**
 Ninguna de las ideas de abajo es "marketplace, para más adelante": el modelo marketplace ya
 está activo desde el lanzamiento, igual que el directo (`CLAUDE.md` líneas 11 y 18). Que estas
 ideas estén en un backlog post-MVP es solo por tamaño/prioridad de la idea puntual, no por ser
