@@ -17,6 +17,7 @@ import { Familias } from './pages/Familias';
 import { FamiliaDetalle } from './pages/familias/FamiliaDetalle';
 import { Guardias } from './pages/Guardias';
 import { Evv } from './pages/Evv';
+import { Facturacion } from './pages/Facturacion';
 import { Continuidad } from './pages/Continuidad';
 import { ListaPrecios } from './pages/ListaPrecios';
 import { UsuariosPanel } from './pages/UsuariosPanel';
@@ -53,6 +54,7 @@ function App() {
                     <Route path="familias/:id" element={<FamiliaDetalle />} />
                     <Route path="guardias" element={<Guardias />} />
                     <Route path="verificacion-visitas" element={<Evv />} />
+                    <Route path="facturacion" element={<Facturacion />} />
                     <Route path="continuidad" element={<Continuidad />} />
                     <Route path="lista-precios" element={<ListaPrecios />} />
                     <Route path="usuarios-panel" element={<ProtectedRoute soloAdmin><UsuariosPanel /></ProtectedRoute>} />
