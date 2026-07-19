@@ -16,6 +16,7 @@ import { AsistenteDetalle } from './pages/asistentes/AsistenteDetalle';
 import { Familias } from './pages/Familias';
 import { FamiliaDetalle } from './pages/familias/FamiliaDetalle';
 import { Guardias } from './pages/Guardias';
+import { Comunicacion } from './pages/Comunicacion';
 import { Evv } from './pages/Evv';
 import { Facturacion } from './pages/Facturacion';
 import { Documentacion } from './pages/Documentacion';
@@ -54,6 +55,7 @@ function App() {
                     <Route path="familias" element={<Familias />} />
                     <Route path="familias/:id" element={<FamiliaDetalle />} />
                     <Route path="guardias" element={<Guardias />} />
+                    <Route path="comunicacion" element={<Comunicacion />} />
                     <Route path="verificacion-guardias" element={<Evv />} />
                     <Route path="facturacion" element={<Facturacion />} />
                     <Route path="documentacion" element={<Documentacion />} />
