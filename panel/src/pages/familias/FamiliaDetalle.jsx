@@ -12,6 +12,7 @@ import { Alert } from '../../components/ui/Alert';
 import { PrestacionesPaciente } from './PrestacionesPaciente';
 import { EditarPacienteModal } from './EditarPacienteModal';
 import { NuevoPacienteModal } from './NuevoPacienteModal';
+import { MonitoreoVitalesPaciente } from './MonitoreoVitalesPaciente';
 
 export function FamiliaDetalle() {
   const { t } = useLocale();
@@ -26,6 +27,7 @@ export function FamiliaDetalle() {
   const [estado, setEstado] = useState('cargando');
   const [error, setError] = useState(null);
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
+  const [pacienteParaVitales, setPacienteParaVitales] = useState(null);
   const [pacienteAEditar, setPacienteAEditar] = useState(null);
   const [mostrarNuevoPaciente, setMostrarNuevoPaciente] = useState(false);
   const [formContacto, setFormContacto] = useState(null);
@@ -150,6 +152,9 @@ export function FamiliaDetalle() {
                   )}
                   <Button variant="secondary" onClick={() => setPacienteSeleccionado(p)}>
                     {t.prestaciones.titulo}
+                  </Button>{' '}
+                  <Button variant="secondary" onClick={() => setPacienteParaVitales(p)}>
+                    {t.vitales_autorizacion.titulo}
                   </Button>
                 </td>
               </tr>
@@ -176,6 +181,10 @@ export function FamiliaDetalle() {
 
       {pacienteSeleccionado && (
         <PrestacionesPaciente paciente={pacienteSeleccionado} onClose={() => setPacienteSeleccionado(null)} />
+      )}
+
+      {pacienteParaVitales && (
+        <MonitoreoVitalesPaciente paciente={pacienteParaVitales} onClose={() => setPacienteParaVitales(null)} />
       )}
 
       {pacienteAEditar && (
