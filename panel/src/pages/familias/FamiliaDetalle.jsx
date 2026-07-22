@@ -95,12 +95,12 @@ export function FamiliaDetalle() {
 
   return (
     <div>
-      <button className="link-volver" onClick={() => navigate('/familias')}>← {t.familias.volver_a_familias}</button>
+      <button className="link-volver" onClick={() => navigate('/familias')}><span aria-hidden="true">←</span> {t.familias.volver_a_familias}</button>
       <h1>{familia.solicitudes?.nombre || '—'}</h1>
 
       <h2>{t.familias.contacto}</h2>
       {errorContacto && <Alert variant="error">{errorContacto}</Alert>}
-      {contactoGuardado && <Alert variant="info">{t.comun.guardar} ✓</Alert>}
+      {contactoGuardado && <Alert variant="info">{t.comun.guardar} <span aria-hidden="true">✓</span></Alert>}
       {formContacto && (
         <>
           <FormField label={t.familias.col_nombre} name="nombre_contacto" value={formContacto.nombre} onChange={(e) => setCampoContacto('nombre', e.target.value)} disabled={!puedeEditarFamilia} />
