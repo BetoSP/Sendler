@@ -1197,7 +1197,7 @@ function TabNotificaciones() {
     try {
       await llamarApi(`/notificaciones/${fila.evento}`, {
         method: 'PATCH',
-        body: JSON.stringify({ emails: fila.emails, activo: fila.activo, whatsapp_activo: fila.whatsapp_activo }),
+        body: JSON.stringify({ emails: fila.emails, activo: fila.activo, whatsapp_activo: fila.whatsapp_activo, notificar_familia: fila.notificar_familia }),
       });
     } catch (err) {
       setError(err.message);
@@ -1216,6 +1216,7 @@ function TabNotificaciones() {
               <th>{t.configuracion.notificaciones_col_emails}</th>
               <th>{t.configuracion.notificaciones_col_activo}</th>
               <th>{t.configuracion.notificaciones_col_whatsapp_activo}</th>
+              <th>{t.configuracion.notificaciones_col_notificar_familia}</th>
               <th></th>
             </tr>
           </thead>
@@ -1236,6 +1237,16 @@ function TabNotificaciones() {
                 </td>
                 <td>
                   <input type="checkbox" checked={fila.whatsapp_activo || false} onChange={(e) => set(fila.evento, 'whatsapp_activo', e.target.checked)} />
+                </td>
+                <td>
+                  {fila.evento === 'incidente_relevo_sin_resolver' && (
+                    <input
+                      type="checkbox"
+                      checked={fila.notificar_familia || false}
+                      title={t.configuracion.notificaciones_notificar_familia_ayuda}
+                      onChange={(e) => set(fila.evento, 'notificar_familia', e.target.checked)}
+                    />
+                  )}
                 </td>
                 <td>
                   <button onClick={() => guardar(fila)} disabled={guardandoEvento === fila.evento}>

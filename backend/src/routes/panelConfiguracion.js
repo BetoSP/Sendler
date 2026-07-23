@@ -207,10 +207,10 @@ panelConfiguracionRouter.get('/notificaciones', async (req, res) => {
 });
 
 panelConfiguracionRouter.patch('/notificaciones/:evento', async (req, res) => {
-  const { emails, activo, whatsapp_activo } = req.body;
+  const { emails, activo, whatsapp_activo, notificar_familia } = req.body;
   let query = supabase
     .from('configuracion_notificaciones')
-    .update({ emails, activo, whatsapp_activo })
+    .update({ emails, activo, whatsapp_activo, notificar_familia })
     .eq('evento', req.params.evento);
   if (req.usuarioPanel.rol !== 'superadmin') {
     query = query.eq('prestadora_id', req.usuarioPanel.prestadoraId);
