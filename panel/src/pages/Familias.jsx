@@ -93,34 +93,27 @@ export function Familias() {
           ) : undefined
         }
       >
-        <table className="panel-tabla">
-          <thead>
-            <tr>
-              <th>{t.familias.col_nombre}</th>
-              <th>{t.familias.col_telefono}</th>
-              <th>{t.familias.col_email}</th>
-              <th>{t.familias.col_localidad}</th>
-              <th>{t.familias.col_pacientes}</th>
-              <th>{t.familias.col_fecha_alta}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filasFiltradas.map((f) => (
-              <tr key={f.id}>
-                <td>{f.solicitudes?.nombre || '—'}</td>
-                <td>{f.solicitudes?.telefono || '—'}</td>
-                <td>{f.solicitudes?.email || '—'}</td>
-                <td>{f.solicitudes?.localidad || '—'}</td>
-                <td>{f.pacientes?.length ?? 0}</td>
-                <td>{new Date(f.created_at).toLocaleDateString()}</td>
-                <td>
-                  <button onClick={() => navigate(`/familias/${f.id}`)}>{t.comun.ver_detalle}</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="lista-tarjetas">
+          {filasFiltradas.map((f) => (
+            <div className="lista-tarjeta" key={f.id}>
+              <div className="lista-tarjeta-header">
+                <div>
+                  <p className="lista-tarjeta-titulo">{f.solicitudes?.nombre || '—'}</p>
+                  <p className="lista-tarjeta-subtitulo">{f.solicitudes?.localidad || '—'}</p>
+                </div>
+                <span className="badge">{t.familias.col_pacientes}: {f.pacientes?.length ?? 0}</span>
+              </div>
+              <div className="lista-tarjeta-meta">
+                <span><strong>{t.familias.col_telefono}:</strong> {f.solicitudes?.telefono || '—'}</span>
+                <span><strong>{t.familias.col_email}:</strong> {f.solicitudes?.email || '—'}</span>
+                <span><strong>{t.familias.col_fecha_alta}:</strong> {new Date(f.created_at).toLocaleDateString()}</span>
+              </div>
+              <div className="lista-tarjeta-acciones">
+                <Button variant="secondary" onClick={() => navigate(`/familias/${f.id}`)}>{t.comun.ver_detalle}</Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </EstadoLista>
     </div>
   );
